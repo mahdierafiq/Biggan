@@ -96,35 +96,47 @@
   </div>
 
   <script>
-    // Helper function to shuffle an array
     function shuffleArray(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-    }
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
 
-    // Generate unique questions
-    function generateQuestions(questionPool, count, elementId) {
-      if (!questionPool.shuffled) {
-        shuffleArray(questionPool.questions);
-        questionPool.shuffled = true;
-        questionPool.pointer = 0;
-      }
+// Generate unique questions with enhanced shuffling
+function generateQuestions(questionPool, count, elementId) {
+  if (!questionPool.shuffled || questionPool.pointer + count > questionPool.questions.length) {
+    shuffleArray(questionPool.questions);
+    questionPool.shuffled = true;
+    questionPool.pointer = 0;
+  }
 
-      const output = [];
-      for (let i = 0; i < count; i++) {
-        output.push(questionPool.questions[questionPool.pointer]);
-        questionPool.pointer = (questionPool.pointer + 1) % questionPool.questions.length;
-      }
+  const output = questionPool.questions.slice(
+    questionPool.pointer,
+    questionPool.pointer + count
+  );
+  questionPool.pointer += count;
 
-      let result = '';
-      output.forEach((question, index) => {
-        result += `<p>${index + 1}. ${question}</p>`;
-      });
+  // Wrap pointer around if exceeding length
+  if (questionPool.pointer >= questionPool.questions.length) {
+    questionPool.pointer = 0;
+  }
 
-      document.getElementById(elementId).innerHTML = result;
-    }
+  let result = '';
+  output.forEach((question, index) => {
+    result += `<p>${index + 1}. ${question}</p>`;
+  });
+
+  document.getElementById(elementId).innerHTML = result;
+}
+
+// Shuffle questions upon page load
+window.onload = () => {
+  [mcqQuestions, fillInTheBlanks, oneWordQuestions].forEach(pool => {
+    shuffleArray(pool.questions);
+    pool.shuffled = true;
+  });
+};
 
     // Question pools
     const mcqQuestions = {
